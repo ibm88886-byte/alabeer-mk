@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم الأستاذ محمد - مدارس العبير</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; text-align: center; }
+        .admin-card { background: white; max-width: 800px; margin: auto; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; border-bottom: 2px solid #e1e3ff; padding-bottom: 10px; }
+        .control-group { background: #f8faff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #d1e3ff; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #2c3e50; }
+        input, select { width: 90%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 1rem; text-align: center; }
+        button { background: #1a73e8; color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-size: 1rem; margin-top: 10px; transition: 0.3s; }
+        button:hover { background: #1557b0; }
+        .step-edit { display: grid; grid-template-columns: 50px 1fr 1fr 1.5fr; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .status-msg { margin-top: 10px; color: green; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>التحكم في حفل مدارس العبير 1447هـ</h2>
+    
+    <div class="control-group">
+        <label>رقم الفقرة النشطة الآن التي تبدأ البث والعرض:</label>
+        <select id="currentStep" onchange="syncVideoField()">
+            </select>
+        
+        <label style="margin-top:15px;">كود فيديو اليوتيوب الخاص بهذه الفقرة (Video ID):</label>
+        <div style="display: flex; gap: 10px; width: 90%; margin: auto; justify-content: center; align-items: center;">
+            <input type="text" id="videoID" placeholder="مثال: fu6zHET_ebw" style="width: 70%;">
+            <button onclick="document.getElementById('videoID').value=''; updateMainStatus();" style="background: #e74c3c; margin-top: 0; padding: 10px 15px; font-size: 0.9rem;" title="إيقاف الفيديو مؤقتاً والعودة لشاشة الانتظار">عرض شاشة الانتظار 📺</button>
+        </div>
+        <br>
+        <button onclick="updateMainStatus()">تحديث العرض المباشر وبدء الفقرة ✅</button>
+    </div>
+
+    <div class="control-group">
+        <label>تعديل نصوص وأكواد بث الفقرات الـ 17 المسبقة:</label>
+        <div id="steps-editor">
+            </div>
+        <button onclick="updateAllSteps()" style="background: #28a745;">حفظ تعديلات العناوين والروابط 💾</button>
+    </div>
+
+    <div id="status" class="status-msg">تم التحديث بنجاح!</div>
+    
+    <footer style="margin-top:20px; font-size:0.8rem; color:#888;">
+        لوحة تحكم خاصة بالأستاذ محمد أحمد كمال
+    </footer>
+</div>
+
+<script>
+    const dbUrl = "https://alabeer1447-default-rtdb.firebaseio.com/haldat.json";
+
+    const select = document.getElementById('currentStep');
+    const editor = document.getElementById('steps-editor');
+    
+    let steps = [
+        {title: "المقدمة والقرآن الكريم", info: "إعداد: أ/ إبراهيم", videoID: "6h5WAoDM68g"},
+        {title: "كلمة وكيل المدرسة", info: "أ/ محمد بن عبد الله الزهراني", videoID: ""},
+        {title: "النشيد الوطني", info: "طلاب المرحلة الأولية", videoID: ""},
+        {title: "نشيد بلادي منار الهدى", info: "أ/ عماد خميس", videoID: ""},
+        {title: "مسرحية أهمية العلم", info: "أ/ عنتر السيد", videoID: ""},
+        {title: "نشيد أنا إنسان", info: "أ/ وليد جمعة", videoID: ""},
+        {title: "صراع العلم والجهل", info: "أ/ أحمد رفعت", videoID: ""},
+        {title: "نشيد خير الأنام", info: "أ/ حسن علام", videoID: ""},
+        {title: "قصيدة مدارس العبير", info: "أ/ محمود محسن", videoID: ""},
+        {title: "نشيد اللغة الإنجليزية", info: "أ/ محمود يحيى", videoID: ""},
+        {title: "أوبريت يا أجمل المدارس", info: "أ/ محمد قدري", videoID: ""},
+        {title: "مسرحية احترام المعلم", info: "أ/ حماده العجواني", videoID: ""},
+        {title: "نشيد أن تدخلني ربي الجنة", info: "د/ السيد جاد الله", videoID: ""},
+        {title: "الحساب الذهني", info: "أ/ أشرف عبد التواب", videoID: ""},
+        {title: "دورة الماء في الطبيعة", info: "أ/ محمد حمدي", videoID: ""},
+        {title: "نشيد حان الرحيل", info: "أ/ أحمد الشربيني", videoID: ""},
+        {title: "مسيرة التخرج", info: "طلاب الدفعة 34", videoID: ""}
+    ];
+
+    function initLayout() {
+        select.innerHTML = "";
+        editor.innerHTML = "";
+        for(let i=1; i<=17; i++) {
+            select.innerHTML += `<option value="${i}">الفقرة رقم ${i} - ${steps[i-1].title}</option>`;
+            
+            editor.innerHTML += `
+                <div class="step-edit">
+                    <span>${i}</span>
+                    <input type="text" id="t-${i}" value="${steps[i-1].title}" placeholder="العنوان">
+                    <input type="text" id="p-${i}" value="${steps[i-1].info}" placeholder="الوصف">
+                    <input type="text" id="v-${i}" value="${steps[i-1].videoID || ''}" placeholder="كود الفيديو">
+                </div>`;
+        }
+    }
+
+    function syncVideoField() {
+        const savedVideoID = document.getElementById(`v-${select.value}`).value;
+        document.getElementById('videoID').value = savedVideoID;
+    }
+
+    async function updateMainStatus() {
+        const data = {
+            currentStep: parseInt(document.getElementById('currentStep').value),
+            videoID: document.getElementById('videoID').value
+        };
+        await sendData(data);
+    }
+
+    async function updateAllSteps() {
+        let updatedSteps = [];
+        for(let i=1; i<=17; i++) {
+            updatedSteps.push({
+                title: document.getElementById(`t-${i}`).value,
+                info: document.getElementById(`p-${i}`).value,
+                videoID: document.getElementById(`v-${i}`).value
+            });
+        }
+        await sendData({ steps: updatedSteps });
+    }
+
+    async function sendData(data) {
+        try {
+            const response = await fetch(dbUrl, {
+                method: 'PATCH',
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                const msg = document.getElementById('status');
+                msg.style.display = 'block';
+                setTimeout(() => msg.style.display = 'none', 3000);
+            }
+        } catch (e) { alert("خطأ في الاتصال بقاعدة البيانات!"); }
+    }
+
+    async function loadCurrent() {
+        try {
+            const res = await fetch(dbUrl);
+            const data = await res.json();
+            if(data) {
+                if(data.steps) {
+                    data.steps.forEach((s, i) => {
+                        if(document.getElementById(`t-${i+1}`)) document.getElementById(`t-${i+1}`).value = s.title;
+                        if(document.getElementById(`p-${i+1}`)) document.getElementById(`p-${i+1}`).value = s.info;
+                        if(document.getElementById(`v-${i+1}`)) document.getElementById(`v-${i+1}`).value = s.videoID || '';
+                    });
+                }
+                if(data.currentStep) select.value = data.currentStep;
+                if(data.videoID) {
+                    document.getElementById('videoID').value = data.videoID;
+                } else {
+                    syncVideoField();
+                }
+            }
+        } catch(e) { console.log("خطأ أثناء تحميل البيانات الحالية."); }
+    }
+
+    initLayout();
+    loadCurrent();
+</script>
+</body>
+</html>
