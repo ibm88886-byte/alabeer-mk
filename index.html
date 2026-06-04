@@ -2,12 +2,34 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>حفل تخرج مدارس العبير 1447هـ</title>
     <style>
         :root { --ice: #f8faff; --blue: #1a73e8; --gold: #f1c40f; --dark: #2c3e50; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f4f8; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { background: var(--ice); padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #d1e3ff; height: 70px; flex-shrink: 0; box-sizing: border-box; }
+        
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f0f4f8; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            position: relative;
+        }
+        
+        header { 
+            background: var(--ice); 
+            padding: 10px 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 2px solid #d1e3ff; 
+            height: 70px; 
+            flex-shrink: 0; 
+            box-sizing: border-box; 
+        }
+        
         .h-right { display: flex; align-items: center; gap: 15px; }
         .h-right img { width: 50px; }
         
@@ -15,33 +37,89 @@
         #date { font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 2px; }
         #clock { font-size: 1.1rem; font-weight: bold; color: var(--blue); }
         
-        main { flex: 1; display: flex; gap: 20px; padding: 20px; overflow: hidden; }
+        main { 
+            flex: 1; 
+            display: flex; 
+            gap: 20px; 
+            padding: 20px; 
+            overflow: hidden; 
+            box-sizing: border-box;
+        }
+        
         .v-container { flex: 2; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #d1e3ff; position: relative; }
-        .s-container { flex: 1; background: #fff; border-radius: 12px; overflow-y: auto; padding: 15px; border: 1px solid #e1e8ed; }
+        .s-container { flex: 1; background: #fff; border-radius: 12px; overflow-y: auto; padding: 15px; border: 1px solid #e1e8ed; box-sizing: border-box; }
+        
         .step { background: #fff; padding: 15px; margin-bottom: 12px; border-radius: 10px; border-right: 5px solid #edf2f7; display: flex; align-items: center; gap: 12px; transition: 0.3s; }
         .num { background: var(--blue); color: #fff; min-width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .step.active { border-right-color: var(--gold); background: #f7fbff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .step.active .num { background: var(--gold); color: var(--dark); }
-        footer { background: var(--ice); padding: 0 30px; display: flex; justify-content: space-between; border-top: 2px solid #d1e3ff; font-size: 0.9rem; height: 60px; align-items: center; flex-shrink: 0; box-sizing: border-box; }
-        iframe { width: 100%; height: 100%; border: none; }
         
+        footer { 
+            background: var(--ice); 
+            padding: 0 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            border-top: 2px solid #d1e3ff; 
+            font-size: 0.9rem; 
+            height: 60px; 
+            align-items: center; 
+            flex-shrink: 0; 
+            box-sizing: border-box; 
+        }
+        
+        iframe { width: 100%; height: 100%; border: none; }
         .step-info { color: #1a73e8 !important; font-weight: 500; }
 
         #start-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .start-btn { background: var(--gold); color: var(--dark); border:none; padding: 15px 40px; font-size: 1.3rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; }
         .start-btn:hover { transform: scale(1.05); }
 
-        /* التنسيق الموحد للشاشات الصغيرة والجوال */
+        /* التعديل الجذري والنهائي لتثبيت الهيدر والفوتر بالجوال وتوسيط المحتوى */
         @media (max-width: 768px) {
-            body { height: 100vh; overflow: hidden; }
-            main { flex-direction: column; height: calc(100vh - 130px); overflow: hidden; gap: 10px; padding: 10px; }
-            .v-container { flex: none; width: 100%; height: 220px; }
-            .s-container { flex: 1; width: 100%; overflow-y: auto; }
-            header { padding: 10px 15px; height: 70px; }
+            body { 
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                width: 100vw; height: 100vh;
+                overflow: hidden !important; 
+            }
+            header { 
+                position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 10;
+                padding: 10px 15px; 
+            }
             header b { font-size: 0.85rem; }
             #clock { font-size: 0.95rem; }
             #date { font-size: 0.75rem; }
-            footer { height: 60px; padding: 0 15px; font-size: 0.8rem; }
+            
+            footer { 
+                position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; z-index: 10;
+                padding: 0 15px; font-size: 0.8rem; 
+            }
+            
+            main { 
+                position: absolute;
+                top: 70px; /* يبدأ مباشرة بعد الهيدر */
+                bottom: 50px; /* ينتهي مباشرة قبل الفوتر */
+                left: 0; right: 0;
+                width: 100%; height: auto;
+                flex-direction: column; 
+                gap: 10px; 
+                padding: 10px; 
+                overflow: hidden !important;
+            }
+            
+            .v-container { 
+                flex: none; 
+                width: 100%; 
+                height: 45%; /* توزيع المساحة بالتساوي في المنتصف */
+                max-height: 240px;
+            }
+            
+            .s-container { 
+                flex: 1; 
+                width: 100%; 
+                overflow-y: auto !important; /* السماح بالتمرير داخل قائمة الفقرات فقط */
+                -webkit-overflow-scrolling: touch;
+            }
         }
     </style>
 </head>
